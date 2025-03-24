@@ -1,0 +1,120 @@
+@startuml
+
+' Базовый интерфейс TestDataGenerator
+interface ITestDataGenerator {
+    +generateFromClass(Class<?> clazz) : Object
+    +<T> generateFromClass(Class<T> clazz) : T
+    +generateFromClass(Class<?> clazz, Map<String, DataRule> rules) : Object
+
+    +generateFromJson(String json) : Map<String, Object>
+    +<T> generateFromJson(String json, Class<T> clazz) : T
+    +generateFromJson(String json, Map<String, DataRule> rules) : Map<String, Object>
+
+    +generateFromOpenApi(String openApiSpec) : Map<String, Object>
+    +<T> generateFromOpenApi(String openApiSpec, Class<T> clazz) : T
+    +generateFromOpenApi(String openApiSpec, Map<String, DataRule> rules) : Map<String, Object>
+
+    +generateField(String fieldName) : Object
+    +generateField(String fieldName, DataRule rule) : Object
+
+    +generateBatchFromClass(Class<?> clazz, int size) : List<Object>
+    +<T> generateBatchFromClass(Class<T> clazz, int size) : List<T>
+    +generateBatchFromJson(String json, int size) : List<Map<String, Object>>
+    +generateBatchFromOpenApi(String openApiSpec, int size) : List<Map<String, Object>>
+
+    +configureGenerator(Map<String, DataRule> globalRules) : void
+    +getSupportedFields() : List<String>
+}
+
+' Интерфейс для правил генерации данных
+interface DataRule {
+    +getType() : String
+    +getPattern() : String
+    +getRange() : Range
+    +getExamples() : List<Object>
+    +isNullable() : boolean
+}
+
+' Класс для диапазонов
+class Range {
+    -min : Object
+    -max : Object
+    +getMin() : Object
+    +getMax() : Object
+    +from(min: Object, max: Object) : Range
+}
+
+' Реализация TestDataGenerator
+class TestDataGeneratorImpl {
+    -fieldGenerators : Map<String, IFieldGenerator>
+    -globalRules : Map<String, DataRule>
+    -jsonParser : ObjectMapper
+    -openApiParser : OpenApiParser
+    +generateFromClass(Class<?> clazz) : Object
+    +<T> generateFromClass(Class<T> clazz) : T
+    +generateFromClass(Class<?> clazz, Map<String, DataRule> rules) : Object
+    +generateFromJson(String json) : Map<String, Object>
+    +<T> generateFromJson(String json, Class<T> clazz) : T
+    +generateFromJson(String json, Map<String, DataRule> rules) : Map<String, Object>
+    +generateFromOpenApi(String openApiSpec) : Map<String, Object>
+    +<T> generateFromOpenApi(String openApiSpec, Class<T> clazz) : T
+    +generateFromOpenApi(String openApiSpec, Map<String, DataRule> rules) : Map<String, Object>
+    +generateField(String fieldName) : Object
+    +generateField(String fieldName, DataRule rule) : Object
+    +generateBatchFromClass(Class<?> clazz, int size) : List<Object>
+    +<T> generateBatchFromClass(Class<T> clazz, int size) : List<T>
+    +generateBatchFromJson(String json, int size) : List<Map<String, Object>>
+    +generateBatchFromOpenApi(String openApiSpec, int size) : List<Map<String, Object>>
+    +configureGenerator(Map<String, DataRule> globalRules) : void
+    +getSupportedFields() : List<String>
+}
+
+' Интерфейс для генерации отдельных полей
+interface IFieldGenerator {
+    +generate() : Object
+    +generateWithRule(DataRule rule) : Object
+    +supportsField(String fieldName) : boolean
+}
+
+' Реализации генераторов полей
+class StringFieldGenerator {
+    -faker : Faker
+    +generate() : Object
+    +generateWithRule(DataRule rule) : Object
+    +supportsField(String fieldName) : boolean
+}
+
+class NumberFieldGenerator {
+    -random : Random
+    +generate() : Object
+    +generateWithRule(DataRule rule) : Object
+    +supportsField(String fieldName) : boolean
+}
+
+class DateFieldGenerator {
+    -random : Random
+    +generate() : Object
+    +generateWithRule(DataRule rule) : Object
+    +supportsField(String fieldName) : boolean
+}
+
+' Пример DTO для генерации
+class UserDTO {
+    -name : String
+    -age : int
+    -email : String
+    -birthDate : Date
+}
+
+' Связи
+ITestDataGenerator <|.. TestDataGeneratorImpl
+IFieldGenerator <|.. StringFieldGenerator
+IFieldGenerator <|.. NumberFieldGenerator
+IFieldGenerator <|.. DateFieldGenerator
+
+TestDataGeneratorImpl o--> "many" IFieldGenerator : uses
+TestDataGeneratorImpl --> UserDTO : generates
+TestDataGeneratorImpl --> DataRule : uses
+DataRule --> Range : contains
+
+@enduml

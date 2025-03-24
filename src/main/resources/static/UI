@@ -1,0 +1,244 @@
+@startuml
+
+' Базовый интерфейс для UI-тестирования
+interface IUiTestExecutor {
+    +openPage(String url) : void
+    +openPage(Map<String, Object> config) : void
+    +openPage(ExecutableEntity config) : void
+
+    +findElement(String selector) : IUiElement
+    +findElement(Map<String, Object> selector) : IUiElement
+    +findElements(String selector) : List<IUiElement>
+    +findElements(Map<String, Object> selector) : List<IUiElement>
+
+    +executeAction(String selector, String action, Object value) : void
+    +executeAction(Map<String, Object> selector, String action, Map<String, Object> value) : void
+    +executeAction(ExecutableEntity selector, String action, ExecutableEntity value) : void
+
+    +getPageSource() : String
+    +getPageSourceAsMap() : Map<String, Object>
+    +getPageSourceAsEntity() : ExecutableEntity
+
+    +takeScreenshot(String path) : void
+    +takeScreenshotAsBytes() : byte[]
+
+    +waitForCondition(String condition, long timeoutMs) : boolean
+    +waitForCondition(Map<String, Object> condition, long timeoutMs) : boolean
+
+    +close() : void
+    +configure(Map<String, Object> config) : void
+    +configure(ExecutableEntity config) : void
+}
+
+' Интерфейс для элементов UI
+interface IUiElement {
+    +click() : void
+    +setValue(Object value) : void
+    +setValue(Map<String, Object> value) : void
+    +setValue(ExecutableEntity value) : void
+
+    +getText() : String
+    +getAttribute(String attribute) : String
+    +getAttributes() : Map<String, String>
+
+    +isVisible() : boolean
+    +isEnabled() : boolean
+
+    +toMap() : Map<String, Object>
+    +toEntity() : ExecutableEntity
+}
+
+' Расширенный интерфейс для дополнительных возможностей
+interface IAdvancedUiTestExecutor {
+    +executeScript(String script) : Object
+    +executeScript(String script, Map<String, Object> args) : Object
+
+    +switchToFrame(String frameSelector) : void
+    +switchToDefault() : void
+
+    +handleAlert(String action) : void
+    +getAlertText() : String
+
+    +setBrowserSize(int width, int height) : void
+    +emulateDevice(String deviceName) : void
+
+    +recordVideo(String path) : void
+    +stopRecording() : void
+}
+
+' Реализация UiTestExecutor (пример)
+class SelenideTestExecutorImpl {
+    -driver : WebDriver
+    +openPage(String url) : void
+    +openPage(Map<String, Object> config) : void
+    +openPage(ExecutableEntity config) : void
+    +findElement(String selector) : IUiElement
+    +findElement(Map<String, Object> selector) : IUiElement
+    +findElements(String selector) : List<IUiElement>
+    +findElements(Map<String, Object> selector) : List<IUiElement>
+    +executeAction(String selector, String action, Object value) : void
+    +executeAction(Map<String, Object> selector, String action, Map<String, Object> value) : void
+    +executeAction(ExecutableEntity selector, String action, ExecutableEntity value) : void
+    +getPageSource() : String
+    +getPageSourceAsMap() : Map<String, Object>
+    +getPageSourceAsEntity() : ExecutableEntity
+    +takeScreenshot(String path) : void
+    +takeScreenshotAsBytes() : byte[]
+    +waitForCondition(String condition, long timeoutMs) : boolean
+    +waitForCondition(Map<String, Object> condition, long timeoutMs) : boolean
+    +close() : void
+    +configure(Map<String, Object> config) : void
+    +configure(ExecutableEntity config) : void
+}
+
+class PlaywrightTestExecutorImpl {
+    -playwright : Playwright
+    -browser : Browser
+    -page : Page
+    +openPage(String url) : void
+    +openPage(Map<String, Object> config) : void
+    +openPage(ExecutableEntity config) : void
+    +findElement(String selector) : IUiElement
+    +findElement(Map<String, Object> selector) : IUiElement
+    +findElements(String selector) : List<IUiElement>
+    +findElements(Map<String, Object> selector) : List<IUiElement>
+    +executeAction(String selector, String action, Object value) : void
+    +executeAction(Map<String, Object> selector, String action, Map<String, Object> value) : void
+    +executeAction(ExecutableEntity selector, String action, ExecutableEntity value) : void
+    +getPageSource() : String
+    +getPageSourceAsMap() : Map<String, Object>
+    +getPageSourceAsEntity() : ExecutableEntity
+    +takeScreenshot(String path) : void
+    +takeScreenshotAsBytes() : byte[]
+    +waitForCondition(String condition, long timeoutMs) : boolean
+    +waitForCondition(Map<String, Object> condition, long timeoutMs) : boolean
+    +close() : void
+    +configure(Map<String, Object> config) : void
+    +configure(ExecutableEntity config) : void
+}
+
+' Реализация AdvancedUiTestExecutor (пример)
+class AdvancedSelenideTestExecutorImpl {
+    -driver : WebDriver
+    +executeScript(String script) : Object
+    +executeScript(String script, Map<String, Object> args) : Object
+    +switchToFrame(String frameSelector) : void
+    +switchToDefault() : void
+    +handleAlert(String action) : void
+    +getAlertText() : String
+    +setBrowserSize(int width, int height) : void
+    +emulateDevice(String deviceName) : void
+    +recordVideo(String path) : void
+    +stopRecording() : void
+}
+
+' Кастомная обертка из вашей архитектуры
+class ExecutableEntity {
+    -data : Map<String, Object>
+    -metadata : Map<String, String>
+    +getData() : Map<String, Object>
+    +getMetadata() : Map<String, String>
+    +toHashMap() : Map<String, Object>
+    +fromHashMap(Map<String, Object>) : ExecutableEntity
+}
+
+' Связь с существующей архитектурой
+interface TestExecutor {
+    ' Упрощенное представление
+    +execute(Map<String, Object> config) : Map<String, Object>
+}
+
+interface IClientFactory {
+    ' Упрощенное представление
+    +createClient(String configPath, String format) : TestExecutor
+}
+
+interface ITestDataGenerator {
+    ' Упрощенное представление
+    +generateFromClass(Class<?> clazz) : Object
+}
+
+' Наследование и зависимости
+IUiTestExecutor <|.. SelenideTestExecutorImpl
+IUiTestExecutor <|.. PlaywrightTestExecutorImpl
+IAdvancedUiTestExecutor <|.. AdvancedSelenideTestExecutorImpl
+IUiTestExecutor <|.. IAdvancedUiTestExecutor
+
+SelenideTestExecutorImpl --> IUiElement : returns
+PlaywrightTestExecutorImpl --> IUiElement : returns
+AdvancedSelenideTestExecutorImpl --> IUiElement : returns
+
+IUiTestExecutor --> ExecutableEntity : uses
+IClientFactory --> IUiTestExecutor : creates
+ITestDataGenerator --> IUiTestExecutor : provides data
+
+IUiTestExecutor ..|> TestExecutor
+
+@enduml
+
+
+
+IAdvancedUiTestExecutor advancedUi = new AdvancedSelenideTestExecutorImpl();
+advancedUi.emulateDevice("iPhone 11");
+advancedUi.executeScript("alert('Test');");
+advancedUi.handleAlert("accept");
+
+
+
+
+@Test
+void testSimpleFormSubmission() {
+    IClientFactory factory = new ClientFactoryImpl();
+    IUiTestExecutor ui = factory.createClient(
+        Map.of("browser", "chrome"),
+        IUiTestExecutor.class
+    );
+
+    ui.openPage("http://example.com/login");
+    ui.findElement("#username").setValue("user123");
+    ui.findElement("#password").setValue("pass123");
+    ui.findElement("#submit").click();
+
+    assertTrue(ui.waitForCondition("#welcome", 5000));
+    ui.takeScreenshot("login-success.png");
+    ui.close();
+}
+
+
+@Test
+void testFormWithGeneratedData() {
+    IClientFactory factory = new ClientFactoryImpl();
+    IUiTestExecutor ui = factory.createClient(
+        Map.of("browser", "firefox"),
+        IUiTestExecutor.class
+    );
+    ITestDataGenerator dataGenerator = new TestDataGeneratorImpl();
+
+    UserDTO user = dataGenerator.generateFromClass(UserDTO.class);
+    ui.openPage("http://example.com/register");
+    ui.executeAction("#name", "type", user.getName());
+    ui.executeAction("#email", "type", user.getEmail());
+    ui.findElement("#submit").click();
+
+    assertEquals("Registration successful", ui.findElement("#message").getText());
+    ui.close();
+}
+
+
+@Test
+void testFrameAndVideo() {
+    IClientFactory factory = new ClientFactoryImpl();
+    IAdvancedUiTestExecutor ui = factory.createClient(
+        Map.of("browser", "chromium"),
+        IAdvancedUiTestExecutor.class
+    );
+
+    ui.recordVideo("test-video.mp4");
+    ui.openPage("http://example.com/frames");
+    ui.switchToFrame("#payment-frame");
+    ui.findElement("#card-number").setValue("4111-1111-1111-1111");
+    ui.switchToDefault();
+
+    ui.stopRecording();
+    ui.close();
+}

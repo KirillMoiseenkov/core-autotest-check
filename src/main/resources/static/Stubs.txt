@@ -1,0 +1,163 @@
+@startuml
+
+' Базовый интерфейс для мокирования HTTP
+interface IMockHttpServer {
+    +start() : void
+    +stop() : void
+    +isRunning() : boolean
+    +configure(Map<String, Object> config) : void
+    +configure(ExecutableEntity config) : void
+
+    +stubRequest(IMockRequest request, IMockResponse response) : void
+    +stubRequest(Map<String, Object> request, Map<String, Object> response) : void
+    +stubRequest(ExecutableEntity request, ExecutableEntity response) : void
+
+    +stubDynamicRequest(IMockRequest request, Function<IMockRequest, IMockResponse> responseGenerator) : void
+    +stubDynamicRequest(Map<String, Object> request, Function<Map<String, Object>, Map<String, Object>> responseGenerator) : void
+
+    +getRequests() : List<IMockRequest>
+    +getRequestsAsMap() : List<Map<String, Object>>
+    +getRequestsAsEntity() : List<ExecutableEntity>
+
+    +reset() : void
+    +setDefaultResponse(IMockResponse response) : void
+    +setDefaultResponse(Map<String, Object> response) : void
+}
+
+' Интерфейс для описания запроса
+interface IMockRequest {
+    +getMethod() : String
+    +getPath() : String
+    +getHeaders() : Map<String, String>
+    +getQueryParams() : Map<String, String>
+    +getBody() : Object
+    +matches(IMockRequest other) : boolean
+    +toMap() : Map<String, Object>
+    +toEntity() : ExecutableEntity
+}
+
+' Интерфейс для описания ответа
+interface IMockResponse {
+    +getStatusCode() : int
+    +getHeaders() : Map<String, String>
+    +getBody() : Object
+    +getDelayMs() : long
+    +toMap() : Map<String, Object>
+    +toEntity() : ExecutableEntity
+}
+
+' Расширенный интерфейс для дополнительных возможностей
+interface IAdvancedMockHttpServer {
+    +stubFault(String faultType, int probability) : void
+    +stubWithDelay(IMockRequest request, IMockResponse response, long delayMs) : void
+    +stubWithDelay(Map<String, Object> request, Map<String, Object> response, long delayMs) : void
+
+    +verifyRequest(IMockRequest request, int minTimes, int maxTimes) : void
+    +verifyRequest(Map<String, Object> request, int minTimes, int maxTimes) : void
+
+    +setProxyMode(String targetUrl) : void
+    +recordRequests(String targetUrl) : void
+    +playbackRecordedRequests() : void
+}
+
+' Реализация MockHttpServer (пример)
+class MockHttpServerImpl {
+    -server : Object ' Абстрактный сервер (WireMock, MockServer и т.д.)
+    -stubs : List<Stub>
+    -recordedRequests : List<IMockRequest>
+    +start() : void
+    +stop() : void
+    +isRunning() : boolean
+    +configure(Map<String, Object> config) : void
+    +configure(ExecutableEntity config) : void
+    +stubRequest(IMockRequest request, IMockResponse response) : void
+    +stubRequest(Map<String, Object> request, Map<String, Object> response) : void
+    +stubRequest(ExecutableEntity request, ExecutableEntity response) : void
+    +stubDynamicRequest(IMockRequest request, Function<IMockRequest, IMockResponse> responseGenerator) : void
+    +stubDynamicRequest(Map<String, Object> request, Function<Map<String, Object>, Map<String, Object>> responseGenerator) : void
+    +getRequests() : List<IMockRequest>
+    +getRequestsAsMap() : List<Map<String, Object>>
+    +getRequestsAsEntity() : List<ExecutableEntity>
+    +reset() : void
+    +setDefaultResponse(IMockResponse response) : void
+    +setDefaultResponse(Map<String, Object> response) : void
+}
+
+' Реализация AdvancedMockHttpServer (пример)
+class AdvancedMockHttpServerImpl {
+    -server : Object
+    -proxyTarget : String
+    +stubFault(String faultType, int probability) : void
+    +stubWithDelay(IMockRequest request, IMockResponse response, long delayMs) : void
+    +stubWithDelay(Map<String, Object> request, Map<String, Object> response, long delayMs) : void
+    +verifyRequest(IMockRequest request, int minTimes, int maxTimes) : void
+    +verifyRequest(Map<String, Object> request, int minTimes, int maxTimes) : void
+    +setProxyMode(String targetUrl) : void
+    +recordRequests(String targetUrl) : void
+    +playbackRecordedRequests() : void
+}
+
+' Кастомная обертка из вашей архитектуры
+class ExecutableEntity {
+    -data : Map<String, Object>
+    -metadata : Map<String, String>
+    +getData() : Map<String, Object>
+    +getMetadata() : Map<String, String>
+    +toHashMap() : Map<String, Object>
+    +fromHashMap(Map<String, Object>) : ExecutableEntity
+}
+
+' Связь с существующей архитектурой (минимальная)
+interface TestExecutor {
+    ' Упрощенное представление
+    +execute(Map<String, Object> config) : Map<String, Object>
+}
+
+interface IClientFactory {
+    ' Упрощенное представление
+    +createClient(String configPath, String format) : TestExecutor
+}
+
+interface ITestDataGenerator {
+    ' Упрощенное представление
+    +generateFromClass(Class<?> clazz) : Object
+}
+
+' Наследование и зависимости
+IMockHttpServer <|.. MockHttpServerImpl
+IAdvancedMockHttpServer <|.. AdvancedMockHttpServerImpl
+IMockHttpServer <|.. IAdvancedMockHttpServer
+
+MockHttpServerImpl --> IMockRequest : uses
+MockHttpServerImpl --> IMockResponse : uses
+AdvancedMockHttpServerImpl --> IMockRequest : uses
+AdvancedMockHttpServerImpl --> IMockResponse : uses
+
+IMockHttpServer --> ExecutableEntity : uses
+IClientFactory --> IMockHttpServer : creates
+ITestDataGenerator --> IMockHttpServer : provides data
+
+@enduml
+
+
+
+
+IMockHttpServer mock = new MockHttpServerImpl();
+mock.configure(Map.of("port", 8080));
+mock.start();
+
+// Простая заглушка
+mock.stubRequest(
+    Map.of("method", "GET", "path", "/users"),
+    Map.of("status", 200, "body", "{\"id\": 1, \"name\": \"John\"}")
+);
+
+// Динамическая заглушка
+mock.stubDynamicRequest(
+    Map.of("method", "GET", "path", "/users/.*"),
+    req -> Map.of("status", 200, "body", "{\"id\": " + req.get("path").split("/")[2] + "}")
+);
+
+// Проверка запросов
+List<Map<String, Object>> requests = mock.getRequestsAsMap();
+mock.stop();

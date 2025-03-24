@@ -1,0 +1,105 @@
+@startuml
+
+' Базовый интерфейс ClientFactory
+interface IClientFactory {
+    +createClient(String configPath, String format) : TestExecutor
+    +<T extends TestExecutor> createClient(String configPath, String format, Class<T> clientType) : T
+    +createClient(ExecutableEntity config) : TestExecutor
+    +<T extends TestExecutor> createClient(ExecutableEntity config, Class<T> clientType) : T
+
+    +createEmbeddedClient(String configPath, String format) : IEmbeddedTestExecutor
+    +<T extends IEmbeddedTestExecutor> createEmbeddedClient(String configPath, String format, Class<T> clientType) : T
+    +createEmbeddedClient(ExecutableEntity config) : IEmbeddedTestExecutor
+    +<T extends IEmbeddedTestExecutor> createEmbeddedClient(ExecutableEntity config, Class<T> clientType) : T
+
+    +registerFormat(String format, IConfigParser parser) : void
+    +getSupportedFormats() : List<String>
+}
+
+' Интерфейс для парсинга конфигурации
+interface IConfigParser {
+    +parse(String configPath) : Map<String, Object>
+    +parseToEntity(String configPath) : ExecutableEntity
+    +getFormatName() : String
+}
+
+' Реализации парсеров для разных форматов
+class JsonConfigParser {
+    -objectMapper : ObjectMapper
+    +parse(String configPath) : Map<String, Object>
+    +parseToEntity(String configPath) : ExecutableEntity
+    +getFormatName() : String
+}
+
+class YamlConfigParser {
+    -yaml : Yaml
+    +parse(String configPath) : Map<String, Object>
+    +parseToEntity(String configPath) : ExecutableEntity
+    +getFormatName() : String
+}
+
+class XmlConfigParser {
+    -documentBuilder : DocumentBuilder
+    +parse(String configPath) : Map<String, Object>
+    +parseToEntity(String configPath) : ExecutableEntity
+    +getFormatName() : String
+}
+
+class PropertiesConfigParser {
+    -properties : Properties
+    +parse(String configPath) : Map<String, Object>
+    +parseToEntity(String configPath) : ExecutableEntity
+    +getFormatName() : String
+}
+
+' Реализация ClientFactory
+class ClientFactoryImpl {
+    -parsers : Map<String, IConfigParser>
+    -clientMappings : Map<String, Class<? extends TestExecutor>>
+    -embeddedClientMappings : Map<String, Class<? extends IEmbeddedTestExecutor>>
+    +createClient(String configPath, String format) : TestExecutor
+    +<T extends TestExecutor> createClient(String configPath, String format, Class<T> clientType) : T
+    +createClient(ExecutableEntity config) : TestExecutor
+    +<T extends TestExecutor> createClient(ExecutableEntity config, Class<T> clientType) : T
+    +createEmbeddedClient(String configPath, String format) : IEmbeddedTestExecutor
+    +<T extends IEmbeddedTestExecutor> createEmbeddedClient(String configPath, String format, Class<T> clientType) : T
+    +createEmbeddedClient(ExecutableEntity config) : IEmbeddedTestExecutor
+    +<T extends IEmbeddedTestExecutor> createEmbeddedClient(ExecutableEntity config, Class<T> clientType) : T
+    +registerFormat(String format, IConfigParser parser) : void
+    +getSupportedFormats() : List<String>
+}
+
+' Минимальная связь с TestExecutor и IEmbeddedTestExecutor
+interface TestExecutor {
+    ' Упрощенное представление
+    +execute(Map<String, Object> config) : Map<String, Object>
+}
+
+interface IEmbeddedTestExecutor {
+    ' Упрощенное представление
+    +startEmbedded() : void
+}
+
+' Кастомная обертка
+class ExecutableEntity {
+    -data : Map<String, Object>
+    -metadata : Map<String, String>
+    +getData() : Map<String, Object>
+    +getMetadata() : Map<String, String>
+    +toHashMap() : Map<String, Object>
+    +fromHashMap(Map<String, Object>) : ExecutableEntity
+}
+
+' Наследование и зависимости
+IClientFactory <|.. ClientFactoryImpl
+IConfigParser <|.. JsonConfigParser
+IConfigParser <|.. YamlConfigParser
+IConfigParser <|.. XmlConfigParser
+IConfigParser <|.. PropertiesConfigParser
+
+ClientFactoryImpl o--> "many" IConfigParser : uses
+ClientFactoryImpl --> TestExecutor : creates
+ClientFactoryImpl --> IEmbeddedTestExecutor : creates
+ClientFactoryImpl --> ExecutableEntity : uses
+
+@enduml
