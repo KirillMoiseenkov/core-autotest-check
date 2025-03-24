@@ -1,0 +1,128 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2821
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab560
+\pard\pardeftab560\slleading20\partightenfactor0
+
+\f0\fs26 \cf0 @startuml\
+\
+' \uc0\u1041 \u1072 \u1079 \u1086 \u1074 \u1099 \u1081  \u1080 \u1085 \u1090 \u1077 \u1088 \u1092 \u1077 \u1081 \u1089  TestDataGenerator\
+interface ITestDataGenerator \{\
+    +generateFromClass(Class<?> clazz) : Object\
+    +<T> generateFromClass(Class<T> clazz) : T\
+    +generateFromClass(Class<?> clazz, Map<String, DataRule> rules) : Object\
+    \
+    +generateFromJson(String json) : Map<String, Object>\
+    +<T> generateFromJson(String json, Class<T> clazz) : T\
+    +generateFromJson(String json, Map<String, DataRule> rules) : Map<String, Object>\
+    \
+    +generateFromOpenApi(String openApiSpec) : Map<String, Object>\
+    +<T> generateFromOpenApi(String openApiSpec, Class<T> clazz) : T\
+    +generateFromOpenApi(String openApiSpec, Map<String, DataRule> rules) : Map<String, Object>\
+    \
+    +generateField(String fieldName) : Object\
+    +generateField(String fieldName, DataRule rule) : Object\
+    \
+    +generateBatchFromClass(Class<?> clazz, int size) : List<Object>\
+    +<T> generateBatchFromClass(Class<T> clazz, int size) : List<T>\
+    +generateBatchFromJson(String json, int size) : List<Map<String, Object>>\
+    +generateBatchFromOpenApi(String openApiSpec, int size) : List<Map<String, Object>>\
+    \
+    +configureGenerator(Map<String, DataRule> globalRules) : void\
+    +getSupportedFields() : List<String>\
+\}\
+\
+' \uc0\u1048 \u1085 \u1090 \u1077 \u1088 \u1092 \u1077 \u1081 \u1089  \u1076 \u1083 \u1103  \u1087 \u1088 \u1072 \u1074 \u1080 \u1083  \u1075 \u1077 \u1085 \u1077 \u1088 \u1072 \u1094 \u1080 \u1080  \u1076 \u1072 \u1085 \u1085 \u1099 \u1093 \
+interface DataRule \{\
+    +getType() : String\
+    +getPattern() : String\
+    +getRange() : Range\
+    +getExamples() : List<Object>\
+    +isNullable() : boolean\
+\}\
+\
+' \uc0\u1050 \u1083 \u1072 \u1089 \u1089  \u1076 \u1083 \u1103  \u1076 \u1080 \u1072 \u1087 \u1072 \u1079 \u1086 \u1085 \u1086 \u1074 \
+class Range \{\
+    -min : Object\
+    -max : Object\
+    +getMin() : Object\
+    +getMax() : Object\
+    +from(min: Object, max: Object) : Range\
+\}\
+\
+' \uc0\u1056 \u1077 \u1072 \u1083 \u1080 \u1079 \u1072 \u1094 \u1080 \u1103  TestDataGenerator\
+class TestDataGeneratorImpl \{\
+    -fieldGenerators : Map<String, IFieldGenerator>\
+    -globalRules : Map<String, DataRule>\
+    -jsonParser : ObjectMapper\
+    -openApiParser : OpenApiParser\
+    +generateFromClass(Class<?> clazz) : Object\
+    +<T> generateFromClass(Class<T> clazz) : T\
+    +generateFromClass(Class<?> clazz, Map<String, DataRule> rules) : Object\
+    +generateFromJson(String json) : Map<String, Object>\
+    +<T> generateFromJson(String json, Class<T> clazz) : T\
+    +generateFromJson(String json, Map<String, DataRule> rules) : Map<String, Object>\
+    +generateFromOpenApi(String openApiSpec) : Map<String, Object>\
+    +<T> generateFromOpenApi(String openApiSpec, Class<T> clazz) : T\
+    +generateFromOpenApi(String openApiSpec, Map<String, DataRule> rules) : Map<String, Object>\
+    +generateField(String fieldName) : Object\
+    +generateField(String fieldName, DataRule rule) : Object\
+    +generateBatchFromClass(Class<?> clazz, int size) : List<Object>\
+    +<T> generateBatchFromClass(Class<T> clazz, int size) : List<T>\
+    +generateBatchFromJson(String json, int size) : List<Map<String, Object>>\
+    +generateBatchFromOpenApi(String openApiSpec, int size) : List<Map<String, Object>>\
+    +configureGenerator(Map<String, DataRule> globalRules) : void\
+    +getSupportedFields() : List<String>\
+\}\
+\
+' \uc0\u1048 \u1085 \u1090 \u1077 \u1088 \u1092 \u1077 \u1081 \u1089  \u1076 \u1083 \u1103  \u1075 \u1077 \u1085 \u1077 \u1088 \u1072 \u1094 \u1080 \u1080  \u1086 \u1090 \u1076 \u1077 \u1083 \u1100 \u1085 \u1099 \u1093  \u1087 \u1086 \u1083 \u1077 \u1081 \
+interface IFieldGenerator \{\
+    +generate() : Object\
+    +generateWithRule(DataRule rule) : Object\
+    +supportsField(String fieldName) : boolean\
+\}\
+\
+' \uc0\u1056 \u1077 \u1072 \u1083 \u1080 \u1079 \u1072 \u1094 \u1080 \u1080  \u1075 \u1077 \u1085 \u1077 \u1088 \u1072 \u1090 \u1086 \u1088 \u1086 \u1074  \u1087 \u1086 \u1083 \u1077 \u1081 \
+class StringFieldGenerator \{\
+    -faker : Faker\
+    +generate() : Object\
+    +generateWithRule(DataRule rule) : Object\
+    +supportsField(String fieldName) : boolean\
+\}\
+\
+class NumberFieldGenerator \{\
+    -random : Random\
+    +generate() : Object\
+    +generateWithRule(DataRule rule) : Object\
+    +supportsField(String fieldName) : boolean\
+\}\
+\
+class DateFieldGenerator \{\
+    -random : Random\
+    +generate() : Object\
+    +generateWithRule(DataRule rule) : Object\
+    +supportsField(String fieldName) : boolean\
+\}\
+\
+' \uc0\u1055 \u1088 \u1080 \u1084 \u1077 \u1088  DTO \u1076 \u1083 \u1103  \u1075 \u1077 \u1085 \u1077 \u1088 \u1072 \u1094 \u1080 \u1080 \
+class UserDTO \{\
+    -name : String\
+    -age : int\
+    -email : String\
+    -birthDate : Date\
+\}\
+\
+' \uc0\u1057 \u1074 \u1103 \u1079 \u1080 \
+ITestDataGenerator <|.. TestDataGeneratorImpl\
+IFieldGenerator <|.. StringFieldGenerator\
+IFieldGenerator <|.. NumberFieldGenerator\
+IFieldGenerator <|.. DateFieldGenerator\
+\
+TestDataGeneratorImpl o--> "many" IFieldGenerator : uses\
+TestDataGeneratorImpl --> UserDTO : generates\
+TestDataGeneratorImpl --> DataRule : uses\
+DataRule --> Range : contains\
+\
+@enduml}

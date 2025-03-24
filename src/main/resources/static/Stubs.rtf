@@ -1,0 +1,148 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2821
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab560
+\pard\pardeftab560\slleading20\partightenfactor0
+
+\f0\fs26 \cf0 @startuml\
+\
+' \uc0\u1041 \u1072 \u1079 \u1086 \u1074 \u1099 \u1081  \u1080 \u1085 \u1090 \u1077 \u1088 \u1092 \u1077 \u1081 \u1089  \u1076 \u1083 \u1103  \u1084 \u1086 \u1082 \u1080 \u1088 \u1086 \u1074 \u1072 \u1085 \u1080 \u1103  HTTP\
+interface IMockHttpServer \{\
+    +start() : void\
+    +stop() : void\
+    +isRunning() : boolean\
+    +configure(Map<String, Object> config) : void\
+    +configure(ExecutableEntity config) : void\
+    \
+    +stubRequest(IMockRequest request, IMockResponse response) : void\
+    +stubRequest(Map<String, Object> request, Map<String, Object> response) : void\
+    +stubRequest(ExecutableEntity request, ExecutableEntity response) : void\
+    \
+    +stubDynamicRequest(IMockRequest request, Function<IMockRequest, IMockResponse> responseGenerator) : void\
+    +stubDynamicRequest(Map<String, Object> request, Function<Map<String, Object>, Map<String, Object>> responseGenerator) : void\
+    \
+    +getRequests() : List<IMockRequest>\
+    +getRequestsAsMap() : List<Map<String, Object>>\
+    +getRequestsAsEntity() : List<ExecutableEntity>\
+    \
+    +reset() : void\
+    +setDefaultResponse(IMockResponse response) : void\
+    +setDefaultResponse(Map<String, Object> response) : void\
+\}\
+\
+' \uc0\u1048 \u1085 \u1090 \u1077 \u1088 \u1092 \u1077 \u1081 \u1089  \u1076 \u1083 \u1103  \u1086 \u1087 \u1080 \u1089 \u1072 \u1085 \u1080 \u1103  \u1079 \u1072 \u1087 \u1088 \u1086 \u1089 \u1072 \
+interface IMockRequest \{\
+    +getMethod() : String\
+    +getPath() : String\
+    +getHeaders() : Map<String, String>\
+    +getQueryParams() : Map<String, String>\
+    +getBody() : Object\
+    +matches(IMockRequest other) : boolean\
+    +toMap() : Map<String, Object>\
+    +toEntity() : ExecutableEntity\
+\}\
+\
+' \uc0\u1048 \u1085 \u1090 \u1077 \u1088 \u1092 \u1077 \u1081 \u1089  \u1076 \u1083 \u1103  \u1086 \u1087 \u1080 \u1089 \u1072 \u1085 \u1080 \u1103  \u1086 \u1090 \u1074 \u1077 \u1090 \u1072 \
+interface IMockResponse \{\
+    +getStatusCode() : int\
+    +getHeaders() : Map<String, String>\
+    +getBody() : Object\
+    +getDelayMs() : long\
+    +toMap() : Map<String, Object>\
+    +toEntity() : ExecutableEntity\
+\}\
+\
+' \uc0\u1056 \u1072 \u1089 \u1096 \u1080 \u1088 \u1077 \u1085 \u1085 \u1099 \u1081  \u1080 \u1085 \u1090 \u1077 \u1088 \u1092 \u1077 \u1081 \u1089  \u1076 \u1083 \u1103  \u1076 \u1086 \u1087 \u1086 \u1083 \u1085 \u1080 \u1090 \u1077 \u1083 \u1100 \u1085 \u1099 \u1093  \u1074 \u1086 \u1079 \u1084 \u1086 \u1078 \u1085 \u1086 \u1089 \u1090 \u1077 \u1081 \
+interface IAdvancedMockHttpServer \{\
+    +stubFault(String faultType, int probability) : void\
+    +stubWithDelay(IMockRequest request, IMockResponse response, long delayMs) : void\
+    +stubWithDelay(Map<String, Object> request, Map<String, Object> response, long delayMs) : void\
+    \
+    +verifyRequest(IMockRequest request, int minTimes, int maxTimes) : void\
+    +verifyRequest(Map<String, Object> request, int minTimes, int maxTimes) : void\
+    \
+    +setProxyMode(String targetUrl) : void\
+    +recordRequests(String targetUrl) : void\
+    +playbackRecordedRequests() : void\
+\}\
+\
+' \uc0\u1056 \u1077 \u1072 \u1083 \u1080 \u1079 \u1072 \u1094 \u1080 \u1103  MockHttpServer (\u1087 \u1088 \u1080 \u1084 \u1077 \u1088 )\
+class MockHttpServerImpl \{\
+    -server : Object ' \uc0\u1040 \u1073 \u1089 \u1090 \u1088 \u1072 \u1082 \u1090 \u1085 \u1099 \u1081  \u1089 \u1077 \u1088 \u1074 \u1077 \u1088  (WireMock, MockServer \u1080  \u1090 .\u1076 .)\
+    -stubs : List<Stub>\
+    -recordedRequests : List<IMockRequest>\
+    +start() : void\
+    +stop() : void\
+    +isRunning() : boolean\
+    +configure(Map<String, Object> config) : void\
+    +configure(ExecutableEntity config) : void\
+    +stubRequest(IMockRequest request, IMockResponse response) : void\
+    +stubRequest(Map<String, Object> request, Map<String, Object> response) : void\
+    +stubRequest(ExecutableEntity request, ExecutableEntity response) : void\
+    +stubDynamicRequest(IMockRequest request, Function<IMockRequest, IMockResponse> responseGenerator) : void\
+    +stubDynamicRequest(Map<String, Object> request, Function<Map<String, Object>, Map<String, Object>> responseGenerator) : void\
+    +getRequests() : List<IMockRequest>\
+    +getRequestsAsMap() : List<Map<String, Object>>\
+    +getRequestsAsEntity() : List<ExecutableEntity>\
+    +reset() : void\
+    +setDefaultResponse(IMockResponse response) : void\
+    +setDefaultResponse(Map<String, Object> response) : void\
+\}\
+\
+' \uc0\u1056 \u1077 \u1072 \u1083 \u1080 \u1079 \u1072 \u1094 \u1080 \u1103  AdvancedMockHttpServer (\u1087 \u1088 \u1080 \u1084 \u1077 \u1088 )\
+class AdvancedMockHttpServerImpl \{\
+    -server : Object\
+    -proxyTarget : String\
+    +stubFault(String faultType, int probability) : void\
+    +stubWithDelay(IMockRequest request, IMockResponse response, long delayMs) : void\
+    +stubWithDelay(Map<String, Object> request, Map<String, Object> response, long delayMs) : void\
+    +verifyRequest(IMockRequest request, int minTimes, int maxTimes) : void\
+    +verifyRequest(Map<String, Object> request, int minTimes, int maxTimes) : void\
+    +setProxyMode(String targetUrl) : void\
+    +recordRequests(String targetUrl) : void\
+    +playbackRecordedRequests() : void\
+\}\
+\
+' \uc0\u1050 \u1072 \u1089 \u1090 \u1086 \u1084 \u1085 \u1072 \u1103  \u1086 \u1073 \u1077 \u1088 \u1090 \u1082 \u1072  \u1080 \u1079  \u1074 \u1072 \u1096 \u1077 \u1081  \u1072 \u1088 \u1093 \u1080 \u1090 \u1077 \u1082 \u1090 \u1091 \u1088 \u1099 \
+class ExecutableEntity \{\
+    -data : Map<String, Object>\
+    -metadata : Map<String, String>\
+    +getData() : Map<String, Object>\
+    +getMetadata() : Map<String, String>\
+    +toHashMap() : Map<String, Object>\
+    +fromHashMap(Map<String, Object>) : ExecutableEntity\
+\}\
+\
+' \uc0\u1057 \u1074 \u1103 \u1079 \u1100  \u1089  \u1089 \u1091 \u1097 \u1077 \u1089 \u1090 \u1074 \u1091 \u1102 \u1097 \u1077 \u1081  \u1072 \u1088 \u1093 \u1080 \u1090 \u1077 \u1082 \u1090 \u1091 \u1088 \u1086 \u1081  (\u1084 \u1080 \u1085 \u1080 \u1084 \u1072 \u1083 \u1100 \u1085 \u1072 \u1103 )\
+interface TestExecutor \{\
+    ' \uc0\u1059 \u1087 \u1088 \u1086 \u1097 \u1077 \u1085 \u1085 \u1086 \u1077  \u1087 \u1088 \u1077 \u1076 \u1089 \u1090 \u1072 \u1074 \u1083 \u1077 \u1085 \u1080 \u1077 \
+    +execute(Map<String, Object> config) : Map<String, Object>\
+\}\
+\
+interface IClientFactory \{\
+    ' \uc0\u1059 \u1087 \u1088 \u1086 \u1097 \u1077 \u1085 \u1085 \u1086 \u1077  \u1087 \u1088 \u1077 \u1076 \u1089 \u1090 \u1072 \u1074 \u1083 \u1077 \u1085 \u1080 \u1077 \
+    +createClient(String configPath, String format) : TestExecutor\
+\}\
+\
+interface ITestDataGenerator \{\
+    ' \uc0\u1059 \u1087 \u1088 \u1086 \u1097 \u1077 \u1085 \u1085 \u1086 \u1077  \u1087 \u1088 \u1077 \u1076 \u1089 \u1090 \u1072 \u1074 \u1083 \u1077 \u1085 \u1080 \u1077 \
+    +generateFromClass(Class<?> clazz) : Object\
+\}\
+\
+' \uc0\u1053 \u1072 \u1089 \u1083 \u1077 \u1076 \u1086 \u1074 \u1072 \u1085 \u1080 \u1077  \u1080  \u1079 \u1072 \u1074 \u1080 \u1089 \u1080 \u1084 \u1086 \u1089 \u1090 \u1080 \
+IMockHttpServer <|.. MockHttpServerImpl\
+IAdvancedMockHttpServer <|.. AdvancedMockHttpServerImpl\
+IMockHttpServer <|.. IAdvancedMockHttpServer\
+\
+MockHttpServerImpl --> IMockRequest : uses\
+MockHttpServerImpl --> IMockResponse : uses\
+AdvancedMockHttpServerImpl --> IMockRequest : uses\
+AdvancedMockHttpServerImpl --> IMockResponse : uses\
+\
+IMockHttpServer --> ExecutableEntity : uses\
+IClientFactory --> IMockHttpServer : creates\
+ITestDataGenerator --> IMockHttpServer : provides data\
+\
+@enduml}
